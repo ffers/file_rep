@@ -5,6 +5,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class ProductRelate(db):
+    __tablename__ = 'product_relate'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     article = Column(String(50)) # сейчас не используеться

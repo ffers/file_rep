@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class TelegramOrdered(db):
+    __tablename__ = 'telegram_ordered'
     id = Column(Integer, primary_key=True)
     text = Column(String(4096))
     confirmed_address_tg = relationship('ConfirmedAddressTg', backref='telegram_ordered', cascade='all, delete-orphan')

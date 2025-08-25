@@ -4,6 +4,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class ProductAnalitic(db):
+    __tablename__ = 'product_analitic'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     quantity_sale = Column(Integer)

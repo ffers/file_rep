@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class Address(db): # має бути базою для данних по відділеням та адрес
+    __tablename__ = 'address'
     id = Column(Integer, primary_key=True)
     uuid = Column(String(50))
     city_name = Column(String(50))

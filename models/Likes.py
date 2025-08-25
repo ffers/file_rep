@@ -4,6 +4,7 @@ from sqlalchemy.sql import func
 from infrastructure.db_core.base import Base as db
 
 class Likes(db):
+    __tablename__ = 'likes'
     id = Column(Integer, primary_key=True)
     date_created = Column(DateTime(timezone=True), default=func.now())
     author_id = Column(Integer, ForeignKey(

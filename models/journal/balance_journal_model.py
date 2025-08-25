@@ -8,6 +8,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class BalanceJournal(db):
+    __tablename__ = 'balance_journal'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     event_date = Column(DateTime)

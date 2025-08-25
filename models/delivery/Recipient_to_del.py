@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class Recipient(db):
+    __tablename__ = 'recipient'
     id = Column(Integer, primary_key=True)
     recipient_title = Column(String(50))
     recipient_first_name = Column(String(50))

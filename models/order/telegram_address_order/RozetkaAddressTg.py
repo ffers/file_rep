@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class RozetkaAddressTg(db):
+    __tablename__ = 'rozetka_address_tg'
     id = Column(Integer, primary_key=True)
     message_id = Column(Integer)
     chat_id = Column(Integer)

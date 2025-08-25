@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from infrastructure.db_core.base import Base as db
 
 class MoneyJournal(db):
+    __tablename__ = 'money_journal'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.now(timezone.utc))
     event_date = Column(DateTime)

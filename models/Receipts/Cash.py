@@ -6,6 +6,7 @@ from infrastructure.db_core.base import Base as db
  
 
 class Cash(db):
+    __tablename__ = 'cash'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow())
     cash_id = Column(String(255))

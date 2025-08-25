@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class OrderItems(db):
+    __tablename__ = 'order_items'
     id = Column(Integer, primary_key=True)
     product_id = Column(Integer, nullable=False)
     quantity = Column(Integer, nullable=False)

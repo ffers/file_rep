@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class Reply2(db):
+    __tablename__ = 'reply2'
     id = Column(Integer, primary_key=True)
     comment_id = Column(Integer, ForeignKey('reply.id', name='reply2_comment_id'), nullable=False)
     text = Column(Text)

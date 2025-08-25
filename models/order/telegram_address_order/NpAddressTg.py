@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class NpAddressTg(db):
+    __tablename__ = 'np_address_tg'
     id = Column(Integer, primary_key=True)
     message_id = Column(Integer)
     chat_id = Column(Integer)

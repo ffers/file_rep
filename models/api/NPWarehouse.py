@@ -4,6 +4,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class DeliveryOrder(db):
+    __tablename__ = 'delivery_order'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.now)
     city = Column(String(50), nullable=False)

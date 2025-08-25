@@ -6,6 +6,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Receipt(db):
+    __tablename__ = 'receipt'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow())
     shift_id = Column(Integer, ForeignKey(
