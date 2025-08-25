@@ -1,14 +1,18 @@
-from server_flask.db import db
-from server_flask.models import ProductSource
-from utils import OC_logger
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from psycopg2.errors import UniqueViolation
-from infrastructure import current_project_id
 
-class SourceRep:
-    def __init__(self):
+from infrastructure.models import ProductSource
+from infrastructure.context import current_project_id
+from utils import OC_logger
+
+from .base import ScopedRepo
+
+
+class SourceRep(ScopedRepo):
+    def __init__(self, session):
+        super().__init__(session, current_project_id.get())
         self.logger = OC_logger.oc_log("source")
-        self.pid = current_project_id.get()
 
     def create_v2(self, data):
         try:
@@ -17,87 +21,77 @@ class SourceRep:
                 name=data[1],
                 price=data[2],
                 quantity=data[3],
-                money=data[4]
+                money=data[4],
+                project_id=self.project_id,
             )
-            db.session.add(item)
-            db.session.commit()
+            self.session.add(item)
+            self.session.commit()
             return item
         except IntegrityError as e:
             assert isinstance(e.orig, UniqueViolation)
-            raise ValueError('Артікул вже використовується')
+            raise ValueError("Артікул вже використовується")
         except Exception as e:
             self.logger.error("Помилка при створенні джерела", exc_info=True)
-            raise ValueError('Джерело не створено!') 
-
+            raise ValueError("Джерело не створено!")
 
     def load_all(self):
-        try:
-            items = ProductSource.query.order_by(ProductSource.timestamp).all()
-            return items
-        except Exception as e:
-            self.logger.exception(f'load_all: {e}')
-            raise
-
+        stmt = select(ProductSource).order_by(ProductSource.timestamp)
+        return self.session.scalars(stmt).all()
 
     def load_article(self, article):
         try:
-            print(article)
-            item = ProductSource.query.filter_by(article=article).first()
-            return item
+            stmt = select(ProductSource).where(ProductSource.article == article)
+            return self.session.scalars(stmt).first()
         except Exception:
-            db.session.rollback()
-            print("Не найден артикль")
+            self.session.rollback()
             return False
 
     def load_id(self, id):
-        try:
-            item = ProductSource.query.filter_by(id=id).first()
-            return item
-        except Exception as e:
-            return False, e
+        stmt = select(ProductSource).where(ProductSource.id == id)
+        return self.session.scalars(stmt).first()
 
     def update_source(self, id, data):
         try:
-            product = ProductSource.query.get_or_404(id)
+            product = self.session.get(ProductSource, id)
+            if product is None:
+                raise ValueError("ProductSource not found")
             product.article = data[0]
             product.name = data[1]
             product.price = data[2]
             product.quantity = data[3]
             product.money = data[4]
-            db.session.commit()
+            self.session.commit()
             return True
         except Exception as e:
-            db.session.rollback()
+            self.session.rollback()
             return False, e
-
 
     def update_quantity(self, id, quantity):
         try:
-            product = ProductSource.query.get_or_404(id)
+            product = self.session.get(ProductSource, id)
+            if product is None:
+                raise ValueError("ProductSource not found")
             product.quantity = quantity
-            db.session.commit()
+            self.session.commit()
             return True
         except Exception as e:
-            db.session.rollback()
+            self.session.rollback()
             return False, e
-
 
     def delete_(self, id):
         try:
-            task_to_delete = ProductSource.query.get_or_404(id)
-            print(">>> Start delete in datebase")
-            db.session.delete(task_to_delete)
-            db.session.commit()
-            print(">>> Delete in datebase")
+            task_to_delete = self.session.get(ProductSource, id)
+            if task_to_delete is None:
+                raise ValueError("ProductSource not found")
+            self.session.delete(task_to_delete)
+            self.session.commit()
             return True
         except Exception as e:
             return False, e
 
     def load_item(self, product_id):
-        product = ProductSource.query.get_or_404(product_id)
-        return product
+        return self.session.get(ProductSource, product_id)
 
- 
     def add_product_source(self, data_list):
         try:
             item = ProductSource(
@@ -105,23 +99,23 @@ class SourceRep:
                 name=data_list[1],
                 price=data_list[2],
                 quantity=data_list[3],
-                money=data_list[4]
+                money=data_list[4],
+                project_id=self.project_id,
             )
-            db.session.add(item)
-            db.session.commit()
-            db.session.close()
+            self.session.add(item)
+            self.session.commit()
             return True
         except Exception as e:
             return False, e
 
     def delete_product_source(self, id):
         try:
-            task_to_delete = ProductSource.query.get_or_404(id)
-            print(">>> Start delete in datebase")
-            db.session.delete(task_to_delete)
-            db.session.commit()
-            print(">>> Delete in datebase")
+            task_to_delete = self.session.get(ProductSource, id)
+            if task_to_delete is None:
+                raise ValueError("ProductSource not found")
+            self.session.delete(task_to_delete)
+            self.session.commit()
             return True
         except Exception as e:
             return False, e
-    
+

@@ -1,46 +1,53 @@
-from server_flask.models import Recipient
-from server_flask.db import db
+from sqlalchemy import select
+
+from infrastructure.models import Recipient
+from infrastructure.context import current_project_id
+
+from .base import ScopedRepo
 
 
+class RecipientRep(ScopedRepo):
+    def __init__(self, session):
+        super().__init__(session, current_project_id.get())
 
-class RecipientRep:
     def create(self, item_new):
         item = Recipient(
             first_name=item_new.first_name,
             last_name=item_new.last_name,
             second_name=item_new.second_name,
             phone=item_new.phone,
-            email=item_new.email
+            email=item_new.email,
+            project_id=self.project_id,
         )
-        db.session.add(item)
-        db.session.commit()
-        db.session.refresh(item)
+        self.session.add(item)
+        self.session.commit()
+        self.session.refresh(item)
         return item
 
     def read_item(self, item_id):
-        return Recipient.query.get_or_404(item_id)
-
+        item = self.session.get(Recipient, item_id)
+        if item is None:
+            raise ValueError("Recipient not found")
+        return item
 
     def update(self, item_id, item_new):
         item = self.read_item(item_id)
-        item.first_name=item_new.first_name,
-        item.last_name=item_new.last_name,
-        item.second_name=item_new.second_name,
-        item.phone=item_new.phone,
-        item.email=item_new.email
-        db.session.commit()
-        db.session.refresh(item)
+        item.first_name = item_new.first_name
+        item.last_name = item_new.last_name
+        item.second_name = item_new.second_name
+        item.phone = item_new.phone
+        item.email = item_new.email
+        self.session.commit()
+        self.session.refresh(item)
         return item
 
     def delete(self, item_id):
         item = self.read_item(item_id)
-        db.session.delete(item)
-        db.session.commit()
+        self.session.delete(item)
+        self.session.commit()
         return True
 
-
-
     def read_all(self):
-        items = Recipient.query.all()
-        return items
-    
+        stmt = select(Recipient)
+        return self.session.scalars(stmt).all()
+

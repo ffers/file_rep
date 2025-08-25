@@ -1,21 +1,30 @@
-from server_flask.db import db
-from server_flask.models import Arrival
+from sqlalchemy import select
+
+from infrastructure.models import Arrival
 from infrastructure.context import current_project_id
 
-class ArrivalRep:
-    def __init__(self):
-        self.pid = current_project_id.get()
-        
-    def add_arrival(self, combined_list):
+from .base import ScopedRepo
 
-        for item in combined_list:
-            datetime_new, product_id, quantity, price, total = item
-            arrival = Arrival(product_id=product_id, body_price=price, quantity=quantity,
-                                             total_price=total, datetime_new=datetime_new)
-            db.session.add(arrival)
-        db.session.commit()
+
+class ArrivalRep(ScopedRepo):
+    def __init__(self, session):
+        super().__init__(session, current_project_id.get())
+
+    def add_arrival(self, combined_list):
+        for datetime_new, product_id, quantity, price, total in combined_list:
+            arrival = Arrival(
+                product_id=product_id,
+                body_price=price,
+                quantity=quantity,
+                total_price=total,
+                datetime_new=datetime_new,
+                project_id=self.project_id,
+            )
+            self.session.add(arrival)
+        self.session.commit()
         return True
 
     def load_arrival(self):
-        arrival = Arrival.query.order_by(Arrival.timestamp).all()
-        return arrival
+        stmt = select(Arrival).order_by(Arrival.timestamp)
+        return self.session.scalars(stmt).all()
+
