@@ -1,21 +1,24 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
+from infrastructure.db_core.base import Base as db
 
-class Address(db.Model): # має бути базою для данних по відділеням та адрес
-    id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(50))
-    city_name = db.Column(db.String(50))
-    city_ref = db.Column(db.String(50))
-    region = db.Column(db.String(50))
-    area = db.Column(db.String(50))
-    warehouse_option = db.Column(db.String(50))
-    warehouse_text = db.Column(db.String(50))
-    warehouse_ref = db.Column(db.String(50))
-    description_delivery = db.Column(db.String(50))
-    warehouse_text = db.Column(db.String(50))
-    place_street = db.Column(db.String(50))
-    place_number = db.Column(db.String(50))
-    place_house = db.Column(db.String(50))
-    place_flat = db.Column(db.String(50))
-    street_ref = db.Column(db.String(50))
-    title_city = db.Column(db.String(50))
+class Address(db): # має бути базою для данних по відділеням та адрес
+    __tablename__ = 'address'
+    id = Column(Integer, primary_key=True)
+    uuid = Column(String(50))
+    city_name = Column(String(50))
+    city_ref = Column(String(50))
+    region = Column(String(50))
+    area = Column(String(50))
+    warehouse_option = Column(String(50))
+    warehouse_text = Column(String(50))
+    warehouse_ref = Column(String(50))
+    description_delivery = Column(String(50))
+    warehouse_text = Column(String(50))
+    place_street = Column(String(50))
+    place_number = Column(String(50))
+    place_house = Column(String(50))
+    place_flat = Column(String(50))
+    street_ref = Column(String(50))
+    title_city = Column(String(50))
     

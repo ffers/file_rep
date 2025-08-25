@@ -1,10 +1,13 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from server_flask.db import db
+from infrastructure.db_core.base import Base as db
 
 
-class Project(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    timestamp = db.Column(db.DateTime, default=datetime.now(datetime.timezone.utc))
-    user_id = db.Column(db.Integer, db.ForeignKey(
+class Project(db):
+    __tablename__ = 'project'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    timestamp = Column(DateTime, default=datetime.now(datetime.timezone.utc))
+    user_id = Column(Integer, ForeignKey(
         'users.id', name='fk_project_user_id'), nullable=False)

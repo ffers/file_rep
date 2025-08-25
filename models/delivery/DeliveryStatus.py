@@ -1,9 +1,12 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
+from infrastructure.db_core.base import Base as db
 
 
-class DeliveryStatus(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.Integer)
-    name = db.Column(db.String(50))
-    description = db.Column(db.String(300))
-    delivery_order = db.relationship("DeliveryOrder", back_populates="delivery_status")
+class DeliveryStatus(db):
+    __tablename__ = 'delivery_status'
+    id = Column(Integer, primary_key=True)
+    code = Column(Integer)
+    name = Column(String(50))
+    description = Column(String(300))
+    delivery_order = relationship("DeliveryOrder", back_populates="delivery_status")

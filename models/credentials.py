@@ -1,8 +1,9 @@
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
 from sqlalchemy.orm import declarative_base, Session
 from datetime import datetime
 from domain.models.credentials_dto import CredentialsDTO
+from infrastructure.db_core.base import Base as db
 
 Base = declarative_base()
 

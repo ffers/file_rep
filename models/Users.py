@@ -1,6 +1,6 @@
 from flask_login import UserMixin
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
 from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
@@ -32,4 +32,4 @@ class Users(db, UserMixin):
         cascade="all, delete-orphan",
         passive_deletes=True,
     )
-    #dsd project = db.relationship('Project', secondary='user_project', backref='user')
+    #dsd project = relationship('Project', secondary='user_project', backref='user')

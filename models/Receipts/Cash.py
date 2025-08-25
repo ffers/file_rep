@@ -1,16 +1,19 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from server_flask.db import db
 from DTO import ReceiptDTO
+from infrastructure.db_core.base import Base as db
  
 
-class Cash(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow())
-    cash_id = db.Column(db.String(255))
-    fiscal_number = db.Column(db.String(255))
-    name = db.Column(db.String(255))
-    shifts =  db.relationship('Shift', backref='cash')
-    project_id = db.Column(db.Integer, db.ForeignKey(
+class Cash(db):
+    __tablename__ = 'cash'
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow())
+    cash_id = Column(String(255))
+    fiscal_number = Column(String(255))
+    name = Column(String(255))
+    shifts =  relationship('Shift', backref='cash')
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_cash_project_id'))
 
     def __init__(self, d: ReceiptDTO):

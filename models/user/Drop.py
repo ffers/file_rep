@@ -1,13 +1,15 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from server_flask.db import db
+from infrastructure.db_core.base import Base as db
 
 
-class Drop(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    project_id = db.Column(db.Integer, db.ForeignKey(
+class Drop(db):
+    __tablename__ = 'drop'
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_drop_project_id'))
-    user_id = db.Column(db.Integer, db.ForeignKey(
+    user_id = Column(Integer, ForeignKey(
         'users.id', name='fk_drop_user_id'), nullable=False)
-    # role = db.relationship('Role', secondary='drop_role', backref='drop')
-
+    # role = relationship('Role', secondary='drop_role', backref='drop')

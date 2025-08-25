@@ -1,19 +1,22 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
+from infrastructure.db_core.base import Base as db
 
-class FinancAnalitic(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    balance = db.Column(db.Float)
-    order_quantity = db.Column(db.Float)
-    rest_start_month = db.Column(db.Float)
-    expect_start_month = db.Column(db.Float)
-    expect_payment = db.Column(db.Float)
-    body = db.Column(db.Float)
-    product_balance = db.Column(db.Float)
-    salary = db.Column(db.Float)
-    debet = db.Column(db.Float)
-    credit = db.Column(db.Float)
-    working_money = db.Column(db.Float)
-    project_id = db.Column(db.Integer, db.ForeignKey(
+class FinancAnalitic(db):
+    __tablename__ = 'financ_analitic'
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    balance = Column(Float)
+    order_quantity = Column(Float)
+    rest_start_month = Column(Float)
+    expect_start_month = Column(Float)
+    expect_payment = Column(Float)
+    body = Column(Float)
+    product_balance = Column(Float)
+    salary = Column(Float)
+    debet = Column(Float)
+    credit = Column(Float)
+    working_money = Column(Float)
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_financ_analitic_project_id'))
