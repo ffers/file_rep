@@ -1,15 +1,16 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from server_flask.db import db
+from infrastructure.db_core.base import Base as db
 
-class Posts(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text)
-    name_post = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    author_id = db.Column(db.Integer, db.ForeignKey(
+class Posts(db):
+    id = Column(Integer, primary_key=True)
+    text = Column(Text)
+    name_post = Column(Text)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    author_id = Column(Integer, ForeignKey(
         'users.id', name='fk_posts_users_id', ondelete="CASCADE"), nullable=True)
-    comments = db.relationship('Comment', backref='posts', passive_deletes=True)
-    likes = db.relationship('Likes', backref='posts', passive_deletes=True)
-    project_id = db.Column(db.Integer, db.ForeignKey(
+    comments = relationship('Comment', backref='posts', passive_deletes=True)
+    likes = relationship('Likes', backref='posts', passive_deletes=True)
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_posts_project_id'))
-

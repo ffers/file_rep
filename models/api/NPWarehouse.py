@@ -1,12 +1,14 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
+from infrastructure.db_core.base import Base as db
 
-class DeliveryOrder(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.now)
-    city = db.Column(db.String(50), nullable=False)
-    city_description = db.Column(db.String(50))
-    region = db.Column(db.String(50))
-    area = db.Column(db.String(50))
-    city_ref = db.Column(db.String(50))
-    warehouse = db.Column(db.String(50))
+class DeliveryOrder(db):
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.now)
+    city = Column(String(50), nullable=False)
+    city_description = Column(String(50))
+    region = Column(String(50))
+    area = Column(String(50))
+    city_ref = Column(String(50))
+    warehouse = Column(String(50))

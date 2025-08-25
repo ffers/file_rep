@@ -1,13 +1,15 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
+from infrastructure.db_core.base import Base as db
 
-class OrderedProduct(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    quantity = db.Column(db.Integer)
-    price = db.Column(db.Numeric(precision=8, scale=2))
-    order_id = db.Column(db.Integer, db.ForeignKey(
+class OrderedProduct(db):
+    id = Column(Integer, primary_key=True)
+    quantity = Column(Integer)
+    price = Column(Numeric(precision=8, scale=2))
+    order_id = Column(Integer, ForeignKey(
         'orders.id', name='fk_ordered_product_order_id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey(
+    product_id = Column(Integer, ForeignKey(
         'products.id', name='fk_ordered_product_product_id'))
-    products = db.relationship('Products', back_populates='ordered_product', overlaps="orders,products")
-    project_id = db.Column(db.Integer, db.ForeignKey(
+    products = relationship('Products', back_populates='ordered_product', overlaps="orders,products")
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_ordered_product_project_id'))

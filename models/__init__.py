@@ -1,3 +1,5 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from .Users import Users
 from .Posts import Posts
 from .Comment import Comment
@@ -46,5 +48,6 @@ from .Receipts.Shift import Shift
 from .Receipts.Cash import Cash
 from .analitic.Balance import Balance
 from .journal.balance_journal_model import BalanceJournal
+from infrastructure.db_core.base import Base as db
 
  

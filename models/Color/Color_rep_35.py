@@ -1,9 +1,11 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
+from infrastructure.db_core.base import Base as db
 
-class Colorrep35(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    color = db.Column(db.Integer, unique=True)
-    quantity = db.Column(db.Integer)
-    project_id = db.Column(db.Integer, db.ForeignKey(
+class Colorrep35(db):
+    id = Column(Integer, primary_key=True)
+    color = Column(Integer, unique=True)
+    quantity = Column(Integer)
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_colorrep35_project_id'))

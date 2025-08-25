@@ -1,20 +1,22 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
+from infrastructure.db_core.base import Base as db
  
-class SourceDifference(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    event_date = db.Column(db.DateTime)
-    source_id = db.Column(db.Integer, db.ForeignKey(
+class SourceDifference(db):
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    event_date = Column(DateTime)
+    source_id = Column(Integer, ForeignKey(
         'product_source.id', name='fk_source_difference_product_source_id'))
-    quantity_crm = db.Column(db.Integer)
-    quantity_stock = db.Column(db.Integer)
-    difference = db.Column(db.Integer)   
-    sold = db.Column(db.Integer)
-    comment = db.Column(db.Text)
-    project_id = db.Column(db.Integer, db.ForeignKey(
+    quantity_crm = Column(Integer)
+    quantity_stock = Column(Integer)
+    difference = Column(Integer)   
+    sold = Column(Integer)
+    comment = Column(Text)
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_source_difference_project_id'))
-    product_source = db.relationship('ProductSource', back_populates='source_difference')  
+    product_source = relationship('ProductSource', back_populates='source_difference')  
 
 
  
