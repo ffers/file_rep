@@ -2,7 +2,8 @@
 # from server_flask.db import db
 
 from infrastructure.models import Orders, OrderedProduct
-from asx.infrastructure.db_core.db_core import db
+from infrastructure.db_core.base import Base as db 
+from infrastructure.context import current_project_id
 
 from sqlalchemy import desc
 from datetime import datetime, timedelta
@@ -12,11 +13,12 @@ from .exception_serv import OrderAlreadyExistsError
 from DTO import OrderDTO
 from utils import OC_logger
 
-from infrastructure.context import current_project_id
+from .base import ScopedRepo
 
-class OrderRep:
+
+class OrderRep(ScopedRepo):
     def __init__(self, session=None):
-        self.session = session
+        self.s = session
         self.logger = OC_logger.oc_log('order_rep')
         self.pid = current_project_id.get()
 
