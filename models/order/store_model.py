@@ -1,14 +1,16 @@
-from server_flask.db import db
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
+from infrastructure.db_core.base import Base as db
 
 
-class Store(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    api = db.Column(db.String(50))
-    token = db.Column(db.String(255))
-    # store_crm_token = db.Column(db.String(255))
-    # marketplace_token = db.Column(db.String(255))
-    token_market = db.Column(db.String(255))
-    orders = db.relationship("Orders", back_populates="store")
-    project_id = db.Column(db.Integer, db.ForeignKey(
+class Store(db):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    api = Column(String(50))
+    token = Column(String(255))
+    # store_crm_token = Column(String(255))
+    # marketplace_token = Column(String(255))
+    token_market = Column(String(255))
+    orders = relationship("Orders", back_populates="store")
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_store_project_id'))

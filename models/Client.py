@@ -1,14 +1,16 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from server_flask.db import db
+from infrastructure.db_core.base import Base as db
 
-class Client(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    name = db.Column(db.String(150))
-    lastname = db.Column(db.String(150))
-    city = db.Column(db.String(150))
-    warehouse = db.Column(db.Integer)
-    phone = db.Column(db.Integer, unique=True)
-    email = db.Column(db.String(150), unique=True)
-    project_id = db.Column(db.Integer, db.ForeignKey(
+class Client(db):
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    name = Column(String(150))
+    lastname = Column(String(150))
+    city = Column(String(150))
+    warehouse = Column(Integer)
+    phone = Column(Integer, unique=True)
+    email = Column(String(150), unique=True)
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_client2_project_id'))

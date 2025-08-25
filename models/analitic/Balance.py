@@ -1,9 +1,8 @@
-from server_flask.db import BaseModel
 from datetime import datetime
-from sqlalchemy import Column, Integer, DateTime, Numeric, \
-    ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from infrastructure.db_core.base import Base as db
 
-class Balance(BaseModel):
+class Balance(db):
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     balance = Column(Numeric(precision=10, scale=2))
@@ -15,4 +14,3 @@ class Balance(BaseModel):
     nova_pay = Column(Numeric(precision=10, scale=2))
     project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_orders_crm_id'), unique=True)
-

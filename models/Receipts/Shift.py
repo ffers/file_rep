@@ -1,18 +1,20 @@
+from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, Date, Numeric, BigInteger, SmallInteger, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
-from server_flask.db import db
 from DTO import ReceiptDTO
+from infrastructure.db_core.base import Base as db
  
 
-class Shift(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow())
-    shift_id = db.Column(db.String(255))
-    open = db.Column(db.DateTime)
-    closed = db.Column(db.DateTime)
-    cash_id = db.Column(db.Integer, db.ForeignKey(
+class Shift(db):
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(DateTime, default=datetime.utcnow())
+    shift_id = Column(String(255))
+    open = Column(DateTime)
+    closed = Column(DateTime)
+    cash_id = Column(Integer, ForeignKey(
         'cash.id', name='fk_shift_cash_id'))
-    receipts =  db.relationship('Receipt', backref='shift')
-    project_id = db.Column(db.Integer, db.ForeignKey(
+    receipts =  relationship('Receipt', backref='shift')
+    project_id = Column(Integer, ForeignKey(
         'project.id', name='fk_shift_project_id'))
 
     def __init__(self, d: ReceiptDTO):
