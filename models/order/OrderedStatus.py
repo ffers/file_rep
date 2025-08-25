@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class OrderedStatus(db):
+    __tablename__ = 'ordered_status'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     description = Column(String(50))

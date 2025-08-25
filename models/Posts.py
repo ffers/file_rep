@@ -4,6 +4,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class Posts(db):
+    __tablename__ = 'posts'
     id = Column(Integer, primary_key=True)
     text = Column(Text)
     name_post = Column(Text)

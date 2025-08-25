@@ -6,6 +6,7 @@ from infrastructure.db_core.base import Base as db
  
 
 class Shift(db):
+    __tablename__ = 'shift'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow())
     shift_id = Column(String(255))

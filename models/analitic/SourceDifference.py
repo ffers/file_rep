@@ -4,6 +4,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
  
 class SourceDifference(db):
+    __tablename__ = 'source_difference'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     event_date = Column(DateTime)

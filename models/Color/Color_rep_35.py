@@ -4,6 +4,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class Colorrep35(db):
+    __tablename__ = 'colorrep35'
     id = Column(Integer, primary_key=True)
     color = Column(Integer, unique=True)
     quantity = Column(Integer)

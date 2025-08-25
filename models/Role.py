@@ -5,6 +5,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Role(db):
+    __tablename__ = 'role'
     id = Column(Integer, primary_key=True)
     name = Column(String(80), unique=True, nullable=False)
     user_roles = relationship(

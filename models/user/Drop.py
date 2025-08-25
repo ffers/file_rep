@@ -5,6 +5,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Drop(db):
+    __tablename__ = 'drop'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     project_id = Column(Integer, ForeignKey(

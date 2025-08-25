@@ -4,6 +4,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class Orders(db):
+    __tablename__ = 'orders'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     phone = Column(String(50))

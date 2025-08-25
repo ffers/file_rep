@@ -5,6 +5,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Supplier(db):
+    __tablename__ = 'supplier'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     project_id = Column(Integer, ForeignKey(

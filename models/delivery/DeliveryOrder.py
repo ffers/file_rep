@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class DeliveryOrder(db):
+    __tablename__ = 'delivery_order'
     id = Column(Integer, primary_key=True)
     ref_ttn = Column(String(50), nullable=False)
     number_ttn = Column(String(50))

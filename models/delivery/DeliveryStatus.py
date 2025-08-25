@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class DeliveryStatus(db):
+    __tablename__ = 'delivery_status'
     id = Column(Integer, primary_key=True)
     code = Column(Integer)
     name = Column(String(50))

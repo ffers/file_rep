@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Store(db):
+    __tablename__ = 'store'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     api = Column(String(50))

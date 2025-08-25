@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class Comment(db):
+    __tablename__ = 'comment'
     id = Column(Integer, primary_key=True)
     text = Column(Text)
     timestamp = Column(DateTime, default=datetime.utcnow)

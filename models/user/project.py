@@ -6,6 +6,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Project(db):
+    __tablename__ = 'project'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     name = Column(String(150))

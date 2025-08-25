@@ -5,6 +5,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Products(db):
+    __tablename__ = 'products'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     article = Column(String(150), unique=True)

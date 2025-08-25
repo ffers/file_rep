@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class DeliveryMethod(db):
+    __tablename__ = 'delivery_method'
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     description = Column(String(50))

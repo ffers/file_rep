@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from infrastructure.db_core.base import Base as db
 
 class Analitic(db):
+    __tablename__ = 'analitic'
     id = Column(Integer, primary_key=True)
     timestamp = Column(
             DateTime, 

@@ -6,6 +6,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class UserToken(db):
+    __tablename__ = 'user_token'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow())
     project_id = Column(Integer, ForeignKey(

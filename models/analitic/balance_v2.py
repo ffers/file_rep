@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, Float, Boolean, DateTime, 
 from infrastructure.db_core.base import Base as db
 
 class BalanceV2(db):
+    __tablename__ = 'balance_v2'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime(timezone.utc()))
     name = Column(String(50))

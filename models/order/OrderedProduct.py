@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from infrastructure.db_core.base import Base as db
 
 class OrderedProduct(db):
+    __tablename__ = 'ordered_product'
     id = Column(Integer, primary_key=True)
     quantity = Column(Integer)
     price = Column(Numeric(precision=8, scale=2))

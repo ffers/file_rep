@@ -5,6 +5,7 @@ from datetime import datetime
 from infrastructure.db_core.base import Base as db
 
 class Manager(db):
+    __tablename__ = 'manager'
     id = Column(Integer, primary_key=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
     project_id = Column(Integer, ForeignKey(

@@ -4,6 +4,7 @@ from infrastructure.db_core.base import Base as db
 
 
 class Colorrep45(db):
+    __tablename__ = 'colorrep45'
     id = Column(Integer, primary_key=True)
     color = Column(Integer, unique=True)
     quantity = Column(Integer)
