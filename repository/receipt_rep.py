@@ -1,24 +1,26 @@
-from server_flask.db import db
-from datetime import datetime, timedelta
-from sqlalchemy import func
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from server_flask.models import Receipt, Shift
 from DTO import ReceiptDTO, ShiftDTO
 from infrastructure import current_project_id
- 
 
-class ReceiptRep:
-    def __init__(self):
-        self.pid = current_project_id.get()
-        
+from .base import ScopedRepo
+
+
+class ReceiptRep(ScopedRepo):
+    def __init__(self, session: Session):
+        super().__init__(session, current_project_id.get())
+
     def add(self, d: ReceiptDTO):
         try:
-            item = Receipt(d) 
-            db.session.add(item)
-            db.session.commit()
-            db.session.close()
+            item = Receipt(d)
+            item.project_id = self.project_id
+            self.session.add(item)
+            self.session.commit()
             return True
         except Exception as e:
-            return False, str(e) 
+            return False, str(e)
 
     def update(self):
         pass
@@ -27,36 +29,47 @@ class ReceiptRep:
         pass
 
 
-class ShiftRep:
+class ShiftRep(ScopedRepo):
+    def __init__(self, session: Session):
+        super().__init__(session, current_project_id.get())
+
     def add(self, d: ShiftDTO):
         try:
-            item = Shift(d) 
-            db.session.add(item)
-            db.session.commit()
-            db.session.close()
+            item = Shift(d)
+            item.project_id = self.project_id
+            self.session.add(item)
+            self.session.commit()
             return True
         except Exception as e:
-            return False, str(e) 
-    
+            return False, str(e)
+
     def update(self, d: ShiftDTO):
-        load = Shift.query.filter_by(shift_id=d.shift_id).first()
-        try:
-            item = Shift(d) 
-            db.session.add(item)
-            db.session.commit()
-            db.session.close()
-            return True
-        except Exception as e:
-            return False, str(e) 
-    
+        stmt = select(Shift).where(
+            Shift.shift_id == d.shift_id, Shift.project_id == self.project_id
+        )
+        load = self.session.scalars(stmt).first()
+        if not load:
+            return False
+        item = Shift(d)
+        item.id = load.id
+        item.project_id = self.project_id
+        self.session.merge(item)
+        self.session.commit()
+        return True
 
     def delete(self):
         pass
-        
+
     def load_shift_date_token(self, date):
-        token = Shift.query.filter_by(timestamp=date).first()
-        return token.checkbox_access_token
-    
+        stmt = select(Shift).where(
+            Shift.timestamp == date, Shift.project_id == self.project_id
+        )
+        token = self.session.scalars(stmt).first()
+        return token.checkbox_access_token if token else None
+
     def load_shift_open(self, date):
-        data_list = Shift.query.filter_by(closed=None).all()
-        return data_list
+        stmt = select(Shift).where(
+            Shift.closed == None, Shift.project_id == self.project_id
+        )
+        return self.session.scalars(stmt).all()
+

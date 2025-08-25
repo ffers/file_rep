@@ -1,11 +1,7 @@
-# from server_flask.models import Orders, OrderedProduct
-# from server_flask.db import db
-
 from infrastructure.models import Orders, OrderedProduct
-from infrastructure.db_core.base import Base as db 
 from infrastructure.context import current_project_id
 
-from sqlalchemy import desc
+from sqlalchemy import desc, select
 from datetime import datetime, timedelta
 from sqlalchemy.exc import IntegrityError
 from .exception_serv import OrderAlreadyExistsError
@@ -17,10 +13,9 @@ from .base import ScopedRepo
 
 
 class OrderRep(ScopedRepo):
-    def __init__(self, session=None):
-        self.s = session
-        self.logger = OC_logger.oc_log('order_rep')
-        self.pid = current_project_id.get()
+    def __init__(self, session):
+        super().__init__(session, current_project_id.get())
+        self.logger = OC_logger.oc_log("order_rep")
 
     def my_time(self):
         yield (datetime.utcnow())
@@ -54,13 +49,13 @@ class OrderRep(ScopedRepo):
                         payment_status_id=item.payment_status_id,
                         store_id=item.store_id,
                         quantity_orders_costumer=item.quantity_orders_costumer,
-                        project_id=self.pid
+                        project_id=self.project_id
                         )
-            db.session.add(order)
-            db.session.commit()
+            self.session.add(order)
+            self.session.commit()
             return order
         except IntegrityError as e:
-            db.session.rollback()
+            self.session.rollback()
             if "duplicate key" in str(e.orig):
                 raise OrderAlreadyExistsError("Order already exists")
             print("add_order:", e)
@@ -104,19 +99,19 @@ class OrderRep(ScopedRepo):
         order.recipient_id = order_dto.recipient_id
         order.costumer_id = order_dto.costumer_id
         order.store_id = order_dto.store_id
-        db.session.commit()
-        db.session.refresh(order)
+        self.session.commit()
+        self.session.refresh(order)
         return order
     
     def update_payment_status(self, order_id, status_id):
         order = self.load_item(order_id)
         try:
             order.payment_status_id = status_id
-            db.session.commit()
+            self.session.commit()
             self.logger.info(f'Status payment change succes - id: {order_id}, status: {status_id}')
             return True
         except Exception as e:
-            db.session.rollback()
+            self.session.rollback()
             self.logger.error(f'Error: {e}')
             raise ValueError('Помилка при оновленні статусу оплати в реп')
         
@@ -135,11 +130,11 @@ class OrderRep(ScopedRepo):
                 )
                 order.ordered_product.append(ordered_product)
 
-            db.session.commit()
-            db.session.refresh(order)
+            self.session.commit()
+            self.session.refresh(order)
             return  order
         except Exception as e:
-            db.session.rollback()
+            self.session.rollback()
             print("update_ordered_product error:", e)
             return False
 
@@ -151,7 +146,7 @@ class OrderRep(ScopedRepo):
             if order.history:
                 new_comment = order.history + new_comment
             order.history = new_comment
-            db.session.commit()
+            self.session.commit()
             return True
         except:
             return False
@@ -161,7 +156,7 @@ class OrderRep(ScopedRepo):
             order = self.load_item(order_id)
             print("devOrder_rep", new_comment)
             order.history = new_comment
-            db.session.commit()
+            self.session.commit()
             return True
         except:
             return False
@@ -170,7 +165,7 @@ class OrderRep(ScopedRepo):
         try:
             item = self.load_item(id)
             item.send_time = send_time
-            db.session.commit()
+            self.session.commit()
             return True, None
         except Exception as e:
             return False, str(e)
@@ -180,8 +175,8 @@ class OrderRep(ScopedRepo):
         for field, value in dto.model_dump().items():
             if value is not None and hasattr(model, field):
                 setattr(model, field, value)
-        db.session.commit()
-        db.session.refresh(model)
+        self.session.commit()
+        self.session.refresh(model)
         return model
 
         
@@ -198,31 +193,33 @@ class OrderRep(ScopedRepo):
                 setattr(order, key, value)
 
         # Зберігаємо зміни
-        db.session.commit()
-        db.session.refresh(order)
+        self.session.commit()
+        self.session.refresh(order)
         return order  # Повертаємо оновлений об'єкт
 
 
     def load_item(self, order_id):
         try:
-            item = Orders.query.get_or_404(int(order_id))
+            item = self.session.get(Orders, int(order_id))
+            if item is None:
+                raise ValueError("Нема такого замовлення")
             return item
-        except Exception as e:
-            self.logger.error(f'Невдалося завантажити ордер id: {order_id}')
-            raise ValueError('Нема такого замовлення')
+        except Exception:
+            self.logger.error(f"Невдалося завантажити ордер id: {order_id}")
+            raise
 
     def load_item_all(self):
-        item = Orders.query.all()
+        item = self.session.query(Orders).all()
         return item
 
     def load_period_all(self):
-        return Orders.query.filter_by(ordered_status_id=8).all()
+        return self.session.query(Orders).filter_by(ordered_status_id=8).all()
 
     def load_status_id(self, id):
-        return Orders.query.filter_by(ordered_status_id=id).order_by(desc(Orders.id)).all()
+        return self.session.query(Orders).filter_by(ordered_status_id=id).order_by(desc(Orders.id)).all()
 
     def load_period(self, start, stop):
-        items = Orders.query.filter(
+        items = self.session.query(Orders).filter(
             Orders.send_time >= start,
             Orders.send_time <= stop,
             Orders.ordered_status_id == 8
@@ -230,7 +227,10 @@ class OrderRep(ScopedRepo):
         return items
     
     def load_ordered_product(self, item_id):
-        return OrderedProduct.query.get_or_404(int(item_id)) 
+        item = self.session.get(OrderedProduct, int(item_id))
+        if item is None:
+            raise ValueError("Ordered product not found")
+        return item
 
     def load_item_days(self):
         current_time = next(self.my_time())
@@ -240,7 +240,7 @@ class OrderRep(ScopedRepo):
         stop_time = start_time + timedelta(days=1)
         print(start_time)
         print(stop_time)
-        items = Orders.query.filter(
+        items = self.session.query(Orders).filter(
             Orders.send_time >= start_time,
             Orders.send_time <= stop_time,
             Orders.ordered_status_id == 8
@@ -258,7 +258,7 @@ class OrderRep(ScopedRepo):
 
         print(start_time)
         print(stop_time)
-        items = Orders.query.filter(
+        items = self.session.query(Orders).filter(
             Orders.send_time >= start_time,
             Orders.send_time <= stop_time,
             Orders.ordered_status_id == 8
@@ -268,38 +268,38 @@ class OrderRep(ScopedRepo):
 
     def load_all_for_searh_data(self, search_param, search_value):
         if search_value is not None:
-            items = Orders.query.filter_by(
+            items = self.session.query(Orders).filter_by(
                 **{search_param: search_value}
                 ).order_by(
                     desc(Orders.timestamp)
                     ).all()
         else:
-            items = Orders.query.order_by(desc(Orders.timestamp)).all()
+            items = self.session.query(Orders).order_by(desc(Orders.timestamp)).all()
         return items
 
     def load_for_np(self):
-        item = Orders.query.filter(
+        item = self.session.query(Orders).filter(
             Orders.ordered_status_id == 2,
             Orders.delivery_method_id == 1
                                    ).all()
         return item
 
     def load_registred(self):
-        item = Orders.query.filter(
+        item = self.session.query(Orders).filter(
             Orders.ordered_status_id == 11,
             Orders.delivery_method_id == 1
                                    ).all()
         return item
 
     def load_registred_roz(self):
-        item = Orders.query.filter(
+        item = self.session.query(Orders).filter(
             Orders.ordered_status_id == 11,
             Orders.delivery_method_id == 2
                                    ).all()
         return item
     
     def load_unpaid_prom_orders(self, store_id):
-            items = Orders.query.filter(
+            items = self.session.query(Orders).filter(
                 Orders.ordered_status_id.in_([1, 10]),
                 Orders.store_id == store_id,
                 Orders.payment_method_id == 5,
@@ -309,7 +309,7 @@ class OrderRep(ScopedRepo):
 
     def load_send(self):
             
-            items = Orders.query.filter(
+            items = self.session.query(Orders).filter(
                 Orders.ordered_status_id == 8,
                 Orders.send_time == None
             ).all()
@@ -320,7 +320,7 @@ class OrderRep(ScopedRepo):
         try:
             order = self.load_item(id)
             order.ttn = ttn
-            db.session.commit()
+            self.session.commit()
             return True, None
         except Exception as e:
             return False, str(e)
@@ -350,20 +350,20 @@ class OrderRep(ScopedRepo):
                        description_delivery="Одяг Jemis",
                        quantity_orders_costumer = item.quantity_orders_costumer
                        )
-        db.session.add(order)
-        db.session.commit()
+        self.session.add(order)
+        self.session.commit()
         return order
 
     def load_prod_order(self, id):
-        item_all = OrderedProduct.query.filter_by(order_id=id).all()
+        item_all = self.session.query(OrderedProduct).filter_by(order_id=id).all()
         return item_all
 
     def load_for_order_code(self, id):
-        item = Orders.query.filter_by(order_code=id).first()
+        item = self.session.query(Orders).filter_by(order_code=id).first()
         return item
 
     def load_for_code(self, id):
-        item = Orders.query.filter_by(order_id_sources=str(id)).order_by(desc(Orders.timestamp)).first()
+        item = self.session.query(Orders).filter_by(order_id_sources=str(id)).order_by(desc(Orders.timestamp)).first()
         return item
 
     def dublicate_order_prod(self, order_new, ord_prod_old):
@@ -372,20 +372,20 @@ class OrderRep(ScopedRepo):
             print(f"for_dublicate_order_prod {vars(item)}")
             ordered_product = OrderedProduct(product_id=item.product_id, price=item.price, quantity=item.quantity, order_id=order_new.id)
             order_new.ordered_product.append(ordered_product)
-        db.session.commit()
+        self.session.commit()
         return True
 
     def change_status(self, order_id, status):
         order = self.load_item(order_id)
         order.ordered_status_id = status
-        db.session.commit()
+        self.session.commit()
         return {"resp": True, "order_code": order.order_code, "ordered_status": order.ordered_status.name}
 
     def change_status_list(self, orders, status):
         for item in orders:
             order = self.load_item(item)
             order.ordered_status_id = status
-            db.session.commit()
+            self.session.commit()
         return True
 
     def change_address(self, order_id, data):
@@ -395,21 +395,21 @@ class OrderRep(ScopedRepo):
         order.warehouse_text = data["WarehouseText"]
         order.warehouse_ref = data["WarehouseRef"]
         order.warehouse_method_id = data["WarehouseMethod"]
-        db.session.commit()
+        self.session.commit()
         return True
 
     def add_order_code(self, order, code):
         order.order_id_sources = code
         order.order_code = code
-        db.session.commit()
+        self.session.commit()
         return True
 
     def search_for_phone(self, phone):
-        order = Orders.query.filter_by(phone=phone).all()
+        order = self.session.query(Orders).filter_by(phone=phone).all()
         return order
 
     def search_for_all(self, data):
-        order = Orders.query.filter(
+        order = self.session.query(Orders).filter(
             (Orders.phone.ilike(f'%{data}%')) |
             (Orders.client_lastname.ilike(f'%{data}%')) |
             (Orders.client_surname.ilike(f'%{data}%')) |
@@ -420,22 +420,15 @@ class OrderRep(ScopedRepo):
         return order
 
     def delete_order(self, id):
-        task_to_delete = Orders.query.get_or_404(id)
-        if task_to_delete:
-            print(">>> Start delete in datebase")
-            db.session.delete(task_to_delete)
-            db.session.commit()
-            print(">>> Delete in datebase")
-            return True
-        print(">>> Dont delete in datebase")
-        return False
-
-
-ord_rep = OrderRep()
-
-
-
-
+        task_to_delete = self.session.get(Orders, id)
+        if task_to_delete is None:
+            print(">>> Dont delete in datebase")
+            return False
+        print(">>> Start delete in datebase")
+        self.session.delete(task_to_delete)
+        self.session.commit()
+        print(">>> Delete in datebase")
+        return True
 
 
 

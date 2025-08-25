@@ -1,21 +1,30 @@
-from server_flask.db import db
+from sqlalchemy import desc, select
+from sqlalchemy.orm import Session
+
 from server_flask.models import JournalChange
-from sqlalchemy import desc
 from infrastructure.context import current_project_id
 
-class JourChRep:
-    def __init__(self):
-        self.pid = current_project_id.get()
+from .base import ScopedRepo
+
+
+class JourChRep(ScopedRepo):
+    def __init__(self, session: Session):
+        super().__init__(session, current_project_id.get())
 
     def load_all(self):
-        items = JournalChange.query.order_by(desc(JournalChange.timestamp)).all()
-        return items
-
+        stmt = (
+            select(JournalChange)
+            .where(JournalChange.project_id == self.project_id)
+            .order_by(desc(JournalChange.timestamp))
+        )
+        return self.session.scalars(stmt).all()
 
     def load_article(self, article):
-        item = JournalChange.query.filter_by(article=article).first()
-        return item
-
+        stmt = select(JournalChange).where(
+            JournalChange.article == article,
+            JournalChange.project_id == self.project_id,
+        )
+        return self.session.scalars(stmt).first()
 
     def add_(self, data):
         try:
@@ -25,50 +34,40 @@ class JourChRep:
                 body=data[2],
                 product_id=data[3],
                 quantity_stock=data[4],
-                event_date=data[5]
+                event_date=data[5],
+                project_id=self.project_id,
             )
-            db.session.add(item)
-            db.session.commit()
+            self.session.add(item)
+            self.session.commit()
             return True
         except Exception as e:
             return False, e
 
-
-
-    # except:
-    #     return False
-
-    def update_(self, id, data):
-        try:
-            product = JournalChange.query.get_or_404(id)
-            product.article = data[0]
-            product.name = data[1]
-            product.price = data[2]
-            product.quantity = data[3]
-            product.money = data[4]
-            db.session.commit()
-            return True
-        except:
+    def update_(self, item_id, data):
+        item = self.get_by_id(JournalChange, item_id)
+        if not item:
             return False
-
-
-    def update_quan(self, id, quantity):
-        # try:
-        product = JournalChange.query.get_or_404(id)
-        product.quantity = quantity
-        db.session.commit()
+        item.article = data[0]
+        item.name = data[1]
+        item.price = data[2]
+        item.quantity = data[3]
+        item.money = data[4]
+        self.session.commit()
         return True
 
-
-    # except:
-    #     return False
-
-    def delete_(self, id):
-        task_to_delete = JournalChange.query.get_or_404(id)
-        print(">>> Start delete in datebase")
-        db.session.delete(task_to_delete)
-        db.session.commit()
-        print(">>> Delete in datebase")
+    def update_quan(self, item_id, quantity):
+        item = self.get_by_id(JournalChange, item_id)
+        if not item:
+            return False
+        item.quantity = quantity
+        self.session.commit()
         return True
 
-jour_ch_rep = JourChRep()
+    def delete_(self, item_id):
+        item = self.get_by_id(JournalChange, item_id)
+        if not item:
+            return False
+        self.session.delete(item)
+        self.session.commit()
+        return True
+

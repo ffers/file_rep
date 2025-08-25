@@ -1,91 +1,103 @@
-from server_flask.models import ProductAnalitic, Products, OrderedProduct 
-from server_flask.models import SourceDifference
 from datetime import datetime, timedelta
-from server_flask.db import db
-# from server_flask.models import Users, Orders, FinancAnalitic
-from sqlalchemy import func
+
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+
+from server_flask.models import OrderedProduct, ProductAnalitic, Products
 from infrastructure import current_project_id
 
-class ProductAnaliticRep():
-    def __init__(self):
-        self.pid = current_project_id.get()
+from .base import ScopedRepo
 
-    def body_product_price(self, product_id):
-        body_price = db.session.query(Products.body_product_price).filter(Products.id == product_id).scalar()
-        return body_price
 
-    def quantity_product(self, product_id):
-        quantity = db.session.query(Products.quantity).filter(Products.id == product_id).scalar()
-        return quantity
+class ProductAnaliticRep(ScopedRepo):
+    def __init__(self, session: Session):
+        super().__init__(session, current_project_id.get())
 
-    def update_product_analitic(self, *args):
-        try:
-            item = ProductAnalitic.query.filter_by(product_id=args[0]).first()
-            item.money_in_product = args[1]
-            item.quantity_sale = args[2]
-            item.money_in_sale = args[3]
-            db.session.commit()
-            return True
-        except:
+    def body_product_price(self, product_id: int):
+        stmt = select(Products.body_product_price).where(
+            Products.id == product_id,
+            Products.project_id == self.project_id,
+        )
+        return self.session.scalar(stmt)
+
+    def quantity_product(self, product_id: int):
+        stmt = select(Products.quantity).where(
+            Products.id == product_id,
+            Products.project_id == self.project_id,
+        )
+        return self.session.scalar(stmt)
+
+    def update_product_analitic(self, product_id: int, money_prod, qty_sale, money_sale):
+        stmt = select(ProductAnalitic).where(
+            ProductAnalitic.product_id == product_id,
+            ProductAnalitic.project_id == self.project_id,
+        )
+        item = self.session.scalars(stmt).first()
+        if not item:
             return False
+        item.money_in_product = money_prod
+        item.quantity_sale = qty_sale
+        item.money_in_sale = money_sale
+        self.session.commit()
+        return True
 
-    def item_product_analitic(self, product_id):
-        item = ProductAnalitic.query.filter_by(product_id=product_id).first()
-        return item
+    def item_product_analitic(self, product_id: int):
+        stmt = select(ProductAnalitic).where(
+            ProductAnalitic.product_id == product_id,
+            ProductAnalitic.project_id == self.project_id,
+        )
+        return self.session.scalars(stmt).first()
 
     def all_product_analitic(self):
-        item_all = ProductAnalitic.query.order_by(ProductAnalitic.timestamp.desc()).all()
-        return item_all
+        stmt = (
+            select(ProductAnalitic)
+            .where(ProductAnalitic.project_id == self.project_id)
+            .order_by(ProductAnalitic.timestamp.desc())
+        )
+        return self.session.scalars(stmt).all()
 
-    def add_product_analitic(self, product_id):
-        try:
-            print("СРАБОТАЛ АПДЕЙТ АНАЛІТІК")
-            prod_analitic = ProductAnalitic(
-                product_id=product_id,
-                project_id=self.pid
-                                            )
-            db.session.add(prod_analitic)
-            db.session.commit()
-        except:
-            return False
+    def add_product_analitic(self, product_id: int):
+        prod_analitic = ProductAnalitic(
+            product_id=product_id, project_id=self.project_id
+        )
+        self.session.add(prod_analitic)
+        self.session.commit()
+        return True
 
-    def search_an_product_id(self, product_id):
-        prod_an_item = ProductAnalitic.query.filter_by(product_id=product_id).first()
-        return prod_an_item
+    def search_an_product_id(self, product_id: int):
+        return self.item_product_analitic(product_id)
 
-    def get_sum_product_sale(self, product_id):
-        sum_product_sale = db.session.query(func.sum(OrderedProduct.quantity)).filter(OrderedProduct.product_id == product_id).scalar()
-        if not sum_product_sale:
-            sum_product_sale = 0
-        return sum_product_sale
+    def get_sum_product_sale(self, product_id: int):
+        stmt = select(func.sum(OrderedProduct.quantity)).where(
+            OrderedProduct.product_id == product_id,
+            OrderedProduct.project_id == self.project_id,
+        )
+        return self.session.scalar(stmt) or 0
 
     def get_money_sale_day(self):
         current_time = datetime.now()
-        print(f"current_time {current_time}")
         start_time = current_time - timedelta(days=1)
         start_time = start_time.replace(hour=17, minute=0, second=0, microsecond=0)
-        money_sale = (db.session.query(func.count(ProductAnalitic.money_in_sale))
-                      .filter(ProductAnalitic.timestamp >= start_time,
-                        ProductAnalitic.timestamp <= current_time).scalar())
-        return money_sale
+        stmt = select(func.count(ProductAnalitic.money_in_sale)).where(
+            ProductAnalitic.timestamp >= start_time,
+            ProductAnalitic.timestamp <= current_time,
+            ProductAnalitic.project_id == self.project_id,
+        )
+        return self.session.scalar(stmt)
 
-    def delete_item(self, id):
-        task_to_delete = ProductAnalitic.query.get_or_404(id)
-        print(">>> Start delete in datebase")
-        db.session.delete(task_to_delete)
-        db.session.commit()
-        print(">>> Delete in datebase")
+    def delete_item(self, item_id: int):
+        item = self.get_by_id(ProductAnalitic, item_id)
+        if not item:
+            return False
+        self.session.delete(item)
+        self.session.commit()
         return True
 
     def load_prod_order(self):
-        items = OrderedProduct.query.order_by(OrderedProduct.timestamp.desc()).all
-        return items
-    
-    
-
-
-
-
-
-
+        stmt = (
+            select(OrderedProduct)
+            .where(OrderedProduct.project_id == self.project_id)
+            .order_by(OrderedProduct.timestamp.desc())
+        )
+        return self.session.scalars(stmt).all()
 

@@ -1,42 +1,49 @@
-from server_flask.db import db
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
 from server_flask.models import UserToken
 from DTO import UserTokenDTO
-import os
 from infrastructure import current_project_id
 
-class UserTokenRep(object):
-    def __init__(self, token):
-        self.pid = current_project_id.get()
-        if token == token: # на будущее проверка доступа через Fast
-            print("Authorizate")
-        else:
-            print("Unathorithate")
-   
+from .base import ScopedRepo
+
+
+class UserTokenRep(ScopedRepo):
+    def __init__(self, session: Session, token):
+        super().__init__(session, current_project_id.get())
+        self.token = token
+
     def add_token(self, d: UserTokenDTO):
         try:
-            item = UserToken(d)  
-            db.session.add(item)
-            db.session.commit()
-            db.session.close()
+            item = UserToken(d)
+            item.project_id = self.project_id
+            self.session.add(item)
+            self.session.commit()
             return True
         except Exception as e:
             return False, str(e)
-        
+
     def update_token(self, d: UserTokenDTO):
         try:
-            item = UserToken.query.filter_by(user_id=d.user_id).first()
-            item.update_from_dto(d)  
-            db.session.commit() 
+            stmt = select(UserToken).where(
+                UserToken.user_id == d.user_id,
+                UserToken.project_id == self.project_id,
+            )
+            item = self.session.scalars(stmt).first()
+            if not item:
+                return False, "not found"
+            item.update_from_dto(d)
+            self.session.commit()
             return True
         except Exception as e:
-            db.session.rollback() 
-            return False, str(e) 
-        
+            self.session.rollback()
+            return False, str(e)
+
     def load_token_checkbox(self, user_id):
-        token = UserToken.query.filter_by(user_id=user_id).first()
-        return token.checkbox_access_token
-
-
-        
-
+        stmt = select(UserToken).where(
+            UserToken.user_id == user_id,
+            UserToken.project_id == self.project_id,
+        )
+        token = self.session.scalars(stmt).first()
+        return token.checkbox_access_token if token else None
 
