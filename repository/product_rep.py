@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from server_flask.models import ProductAnalitic, ProductRelate, Products
+from infrastructure.models import ProductAnalitic, ProductRelate, Products
 from utils import OC_logger
 from infrastructure import current_project_id
 

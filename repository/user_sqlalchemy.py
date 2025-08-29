@@ -1,18 +1,19 @@
 
 
-from server_flask.models import Users as SQLItem
+from infrastructure.models import Users as SQLItem
 from domain.models.user_dto import UserDTO as DTO
 from domain.repositories.user_repo import ItemRepository
 from infrastructure.context import current_project_id, current_user_id
 
 from utils.exception import EmailDoesNotExist
+from sqlalchemy import select
 
 
 class UserSqlAlchemy(ItemRepository):
     def __init__(self, session): 
         self.uid = current_user_id.get()
         self.pid = current_project_id.get()
-        self.session = session
+        self.s = session
 
     def get_all(self):
         items = SQLItem.query.filter_by(user_id=self.uid).all()
@@ -49,12 +50,9 @@ class UserSqlAlchemy(ItemRepository):
     
     def get_item(self, item_id):
         try:
-            i = SQLItem.query.filter_by(id=item_id).first()
-            return DTO(
-                id=i.id,
-                email=i.email,
-                username=i.username
-            )
+            stmt = select(SQLItem).where(SQLItem.id == item_id)
+            i = self.s.execute(stmt).scalar_one_or_none()
+            return i
         except Exception as e:
 
             print(f"get_item ПОМИлка репо прожект {e}")
@@ -63,12 +61,9 @@ class UserSqlAlchemy(ItemRepository):
 
     def get_by_user_id(self):
         try:
-            i = SQLItem.query.get_or_404(self.uid)
-            return DTO(
-                id=i.id,
-                email=i.email,
-                username=i.username
-            )
+            stmt = select(SQLItem).where(SQLItem.id == self.uid)
+            i = self.s.execute(stmt).scalar_one_or_none()
+            return i
         except Exception as e:
             print(f"ПОМИлка get_by_user_id {e}")
             return None
@@ -90,6 +85,12 @@ class UserSqlAlchemy(ItemRepository):
         self.session.commit()
         self.session.refresh(sql_item)
         return sql_item
+    # DTO(
+    #             id=i.id,
+    #             email=i.email,
+    #             username=i.username,
+    #             password=i.password
+    #         )
 
     def update(self, item: DTO):
         i = SQLItem.query.get_or_404(item.id)
@@ -103,12 +104,8 @@ class UserSqlAlchemy(ItemRepository):
         self.session.commit()
     
     def get_by_email(self, email):
-        i = SQLItem.query.filter_by(email=email).first()
-        print(f"get_by_email {i}")
+        stmt = select(SQLItem).where(SQLItem.email == email)
+        i = self.s.scalars(stmt).first()
         if i is None:
             raise EmailDoesNotExist
-        return DTO(
-                id=i.id,
-                email=i.email,
-                username=i.username
-            )
+        return i

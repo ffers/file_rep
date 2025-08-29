@@ -3,7 +3,7 @@ import copy
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
-from server_flask.models import SourceDifference
+from infrastructure.models import SourceDifference
 from infrastructure import current_project_id
 
 from .base import ScopedRepo

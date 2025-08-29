@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from server_flask.models import Receipt, Shift
+from infrastructure.models import Receipt, Shift
 from DTO import ReceiptDTO, ShiftDTO
 from infrastructure import current_project_id
 

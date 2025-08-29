@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from server_flask.models import DeliveryOrder
+from infrastructure.models import DeliveryOrder
 from infrastructure.context import current_project_id
 
 from .base import ScopedRepo

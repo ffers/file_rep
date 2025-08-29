@@ -1,5 +1,5 @@
-from server_flask.models import PaymentMethod, DeliveryMethod, SourceOrder
-from server_flask.db import db
+from infrastructure.models import PaymentMethod, DeliveryMethod, SourceOrder
+
 from sqlalchemy import desc
 from urllib.parse import unquote
 from datetime import datetime, timedelta

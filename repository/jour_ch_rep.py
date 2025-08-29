@@ -1,7 +1,7 @@
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
-from server_flask.models import JournalChange
+from infrastructure.models import JournalChange
 from infrastructure.context import current_project_id
 
 from .base import ScopedRepo

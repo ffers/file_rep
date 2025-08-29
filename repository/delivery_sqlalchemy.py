@@ -1,6 +1,6 @@
 
 
-from server_flask.models import DeliveryMethod as SQLItem
+from infrastructure.models import DeliveryMethod as SQLItem
 from domain.models.delivery_dto import DeliveryDTO
 from domain.repositories.crm_repo import ItemRepository
 

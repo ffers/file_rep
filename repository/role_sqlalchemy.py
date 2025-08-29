@@ -1,6 +1,6 @@
 
 
-from server_flask.models import Role as SQLItem
+from infrastructure.models import Role as SQLItem
 from domain.repositories.role_repo import ItemRepository
 from domain.models.role_dto import RoleDTO as DTO
 from infrastructure.context import current_project_id, current_user_id

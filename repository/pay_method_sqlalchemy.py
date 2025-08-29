@@ -1,6 +1,6 @@
 
 
-from server_flask.models import PaymentMethod as SQLItem
+from infrastructure.models import PaymentMethod as SQLItem
 from domain.models.pay_method_dto import PayMethodDTO
 from domain.repositories.pay_method_repo import ItemRepository
 

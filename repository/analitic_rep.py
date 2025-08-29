@@ -1,6 +1,6 @@
-from server_flask.models import Analitic
+from infrastructure.models import Analitic
 from sqlalchemy import func
-from server_flask.db import db
+
 from datetime import datetime, timedelta
 from utils import OC_logger, DEBUG
 

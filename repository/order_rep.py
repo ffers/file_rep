@@ -126,7 +126,8 @@ class OrderRep(ScopedRepo):
                     quantity=p.quantity,
                     price=p.price,
                     order_id=order_id,
-                    product_id=p.product_id
+                    product_id=p.product_id,
+                    project_id=order.project_id 
                 )
                 order.ordered_product.append(ordered_product)
 

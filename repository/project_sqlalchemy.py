@@ -1,17 +1,18 @@
 
 
-from server_flask.models import Project as SQLItem
+from infrastructure.models import Project as SQLItem
 from domain.models.project_dto import ProjectDTO as DTO
 from domain.repositories.project_repo import ItemRepository
 from infrastructure.context import current_project_id, current_user_id
-
+from sqlalchemy import select, insert, update, delete
+from sqlalchemy.orm import Session
 
 
 class ProjectSqlAlchemy(ItemRepository):
     def __init__(self, session): 
         self.uid = current_user_id.get()
         self.pid = current_project_id.get()
-        self.session = session
+        self.s = session
 
     def get_all(self):
         items = SQLItem.query.filter_by(user_id=self.uid).all()
@@ -44,17 +45,18 @@ class ProjectSqlAlchemy(ItemRepository):
     
     def get_item(self, item_id):
         try:
-            i = SQLItem.query.filter_by(id=item_id).first()
+            stmt = select(SQLItem).where(SQLItem.id == item_id)
+            i = self.s.execute(stmt).scalar_one_or_none()
             return DTO.model_validate(i, from_attributes=True)
         except Exception as e:
-
             print(f"get_item ПОМИлка репо прожект {e}")
             raise
 
 
     def get_by_user_id(self):
         try:
-            i = SQLItem.query.filter_by(user_id=self.uid).first()
+            stmt = select(SQLItem).where(SQLItem.user_id == self.uid)
+            i = self.s.execute(stmt).scalar_one_or_none()
             return DTO(
                 id=i.id, name=i.name
                 )

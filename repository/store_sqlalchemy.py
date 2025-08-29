@@ -1,6 +1,6 @@
 
-
-from server_flask.models import Store as SQLItem
+from sqlalchemy import select
+from infrastructure.models import Store as SQLItem
 from domain.models.store_dto import StoreDTO
 from domain.repositories.store_repo import ItemRepository
 from infrastructure import current_project_id
@@ -11,7 +11,8 @@ class StoreRepositorySQLAlchemy(ItemRepository):
         self.pid = current_project_id.get()
 
     def get_all(self):
-        stores = SQLItem.query.all()
+        stmt = select(SQLItem)
+        stores = self.session.scalars(stmt).all()
 
         store_dtos = []
         for store in stores:
@@ -55,10 +56,9 @@ class StoreRepositorySQLAlchemy(ItemRepository):
             )
     
     def get_by_token(self, item_token):
-        i = SQLItem.query.filter_by(token=item_token).first()
-        return StoreDTO(
-            i.id, i.name, i.api, i.token, i.token_market
-            )
+        i = self.session.query(SQLItem).filter_by(token=item_token).first()
+        return StoreDTO.model_validate(i)
+
 
     def add(self, item: StoreDTO):
         sql_item = SQLItem(

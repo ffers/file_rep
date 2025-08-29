@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from server_flask.models import UserToken
+from infrastructure.models import UserToken
 from DTO import UserTokenDTO
 from infrastructure import current_project_id
 

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from server_flask.models import OrderedProduct, ProductAnalitic, Products
+from infrastructure.models import OrderedProduct, ProductAnalitic, Products
 from infrastructure import current_project_id
 
 from .base import ScopedRepo

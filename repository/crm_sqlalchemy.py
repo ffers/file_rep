@@ -1,6 +1,6 @@
 
 
-from server_flask.models import Project as SQLItem
+from infrastructure.models import Project as SQLItem
 from domain.models.crm_dto import CrmDTO
 from domain.repositories.crm_repo import ItemRepository
 from infrastructure.context import current_project_id

@@ -2,12 +2,12 @@
 
 
 from domain.models.credentials_dto import CredentialsDTO
-from server_flask.models.credentials import Credentials
+from infrastructure.models.credentials import Credentials
 from sqlalchemy.orm import Session
 
 class CredentialsSQLAlchemy:
-    def __init__(self, db: Session):
-        self.db = db
+    def __init__(self, session: Session):
+        self.db = session
 
     def create(self, dto: CredentialsDTO) -> CredentialsDTO:
         cred = Credentials(

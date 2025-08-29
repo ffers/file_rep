@@ -1,7 +1,7 @@
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
-from server_flask.models import MoneyJournal
+from infrastructure.models import MoneyJournal
 from domain.models.money_jour_dto import MoneyJournalDto
 from infrastructure.context import current_project_id
 

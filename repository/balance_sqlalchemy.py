@@ -1,15 +1,16 @@
 
 
-from server_flask.models import Balance as SQLItem
+from infrastructure.models import Balance as SQLItem
 from domain.models.balance_dto import BalanceDTO
 from domain.repositories.balance_repo import ItemRepository
 from sqlalchemy.orm import Session
-from server_flask.db import db
+from sqlalchemy import select
+
 from infrastructure.context import current_project_id
 
 class BalanceRepositorySQLAlchemy(ItemRepository):
-    def __init__(self, session=Session(db.session)):
-        self.session = session
+    def __init__(self, session):
+        self.s = session
         self.pid = current_project_id.get()
         
     def create(self, item: BalanceDTO):
@@ -48,7 +49,8 @@ class BalanceRepositorySQLAlchemy(ItemRepository):
         return self.get(item.id)
     
     def get_all(self):      
-        items = SQLItem.query.filter_by().all()
+        stmt = select(SQLItem)
+        items = self.s.execute(stmt).scalars().all()
         item_dtos = []
         for item in items:
             dto = BalanceDTO(
@@ -56,7 +58,7 @@ class BalanceRepositorySQLAlchemy(ItemRepository):
                 balance=item.balance,
                 wait=item.wait,
                 stock=item.stock,
-                inwork=item.inwork
+                inwork=item.inwork 
             )
             item_dtos.append(dto)
 

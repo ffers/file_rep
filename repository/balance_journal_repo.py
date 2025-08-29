@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from server_flask.models import BalanceJournal as SQLItem
+from infrastructure.models import BalanceJournal as SQLItem
 from domain.models.balance_journal_dto import BalanceJournalDTO as DTO
 from domain.repositories.balance_journal_repo import ItemRepository
 from infrastructure.context import current_project_id
